@@ -29,7 +29,11 @@ $l['abschluss_overview_titel_titel'] = "Schulen";
 $l['abschluss_overview_titel_name'] = "Name der Schule";
 $l['abschluss_overview_titel_desc'] = "Beschreibung";
 $l['abschluss_overview_titel_alter'] = "Einschulungsalter";
-$l['abschluss_overview_titel_monat'] = "Ab welchem Monat (Zahl) wird man ein Jahr später eingeschult?";
+$l['abschluss_overview_titel_gleichesjahr'] = "Abschluss im gleichen Jahr?";
+$l['abschluss_overview_titel_startmonat'] = "Schuljahresstart";
+$l['abschluss_overview_titel_endmonat'] = "Schuljahresende";
+
+
 $l['abschluss_overview_titel_jahre'] = "Jahrgänge";
 $l['abschluss_overview_titel_standort'] = "Wo befindet sich die Schule?";
 
@@ -42,8 +46,12 @@ $l['abschluss_form_alter'] = "Einschulalter";
 $l['abschluss_form_alter_desc'] = "Ab wann wird man eingeschult?";
 $l['abschluss_form_jahre'] = "Jahrgänge";
 $l['abschluss_form_jahre_desc'] = "Wie viele Jahre besucht man die Schule (nur Zahl)?";
-$l['abschluss_form_monate'] = "Ab welchem Monat (Zahl) wird man ein Jahr später eingeschult?";
-$l['abschluss_form_monate_desc'] = "Bitte nur die Zahl eintragen";
+$l['abschluss_form_anfang'] = "Wann beginnt das Schuljahr?";
+$l['abschluss_form_anfang_desc'] = "Bitte nur die Zahl eintragen (Januar=1 usw.)";
+$l['abschluss_form_ende'] = "Wann endet das Schuljahr?";
+$l['abschluss_form_ende_desc'] = "Bitte nur die Zahl eintragen (Januar=1 usw.)";
+$l['abschluss_form_gleichesjahr'] = "Liegen Startmonat und Abschlussmonat im gleichen Jahr?";
+$l['abschluss_form_gleichesjahr_desc'] = "Wenn das Schuljahr im gleichen Jahr startet wie es beendet, klicke Ja.";
 $l['abschluss_form_standort'] = "Wo befindet sich die Schule?";
 $l['abschluss_form_standort_desc'] = "Wo genau befindet sich die Schule?";
 
