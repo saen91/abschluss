@@ -1,0 +1,20 @@
+Tabellen die ich brauche:
+
+schulid - id int(11) NOT NULL  AUTO_INCREMENT,	
+schulname - Name  varchar(500) CHARACTER SET utf8 NOT NULL,
+schuldesc - Beschreibung longtext CHARACTER SET utf8 NOT NULL,
+schulalter - Einschulalter varchar(140) NOT NULL,
+schuljahranfang - Monat wo die Schule beginnt int(11)  NOT NULL,
+schuljahrende - Monat wo die Schule aufhört int(11)  NOT NULL,
+schuljahre - schuljahre insgesamt int(11)  NOT NULL,
+schulstandort - Wo ist die Schule varchar(500) CHARACTER SET utf8 NOT NULL,
+schulgleichesjahr - int(11)  NOT NULL,
+
+
+// $gleiches_jahr ja / nein(ja)   --- schulgleichesjahr
+// $Stichmonat_Einschulung(September) --- schuljahranfang
+// $Stichmonat_Ende: (Juli) --- schuljahrende
+// $Schuljahre_Dauer: (7 Jahre) --- schuljahre
+// $Einschulung_alter(standard. - 11 Jahre) - schulalter
+
+schu
