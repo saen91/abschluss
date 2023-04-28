@@ -36,8 +36,11 @@ function abschluss_install()
 	`schulname` varchar(500) CHARACTER SET utf8 NOT NULL,	
 	`schuldesc` longtext CHARACTER SET utf8 NOT NULL,
 	`schulalter` varchar(140) NOT NULL,
+	`schuljahranfang` int(11) NOT NULL, 
+	`schuljahrende` int(11) NOT NULL, 
 	`schuljahre` int(11)  NOT NULL,
 	`schulmonate` int(11)  NOT NULL,
+	`schulgleichesjahr` tinyint (1) NOT NULL, 
 	`schulstandort` varchar(500) CHARACTER SET utf8 NOT NULL,
 	PRIMARY KEY (`schulid`)
 	) ENGINE=MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;");
@@ -58,9 +61,9 @@ function abschluss_install()
 	$setting_array = array(
 		
 		// Einstellungen, ob Schulbeschreibungen angezeigt werden sollen
-		'abschluss_schuldesc' => array(
-		'title' => 'Schulbeschreibung',
-	    'description' => 'Sollen bei den Schulen Informationen angezeigt werden?',
+		'abschluss_schuluebersicht' => array(
+		'title' => 'Schuluebersicht',
+	    'description' => 'Soll es eine extra Übersichtsseite für Schulen geben?',
 	    'optionscode' => 'yesno',
 	    'value' => '1', // Default
 	    'disporder' => 1 ),
@@ -77,75 +80,129 @@ function abschluss_install()
 
 	rebuild_settings();
 	
-// Template hinzufügen:
+// Template der Hauptseite hinzufügen:
 	$insert_array = array(
-		'title' => 'abschlussberechnen',
+		'title' => 'abschluss_main',
 		'template' => $db->escape_string('<html>
-<head>
-<title>{$settings[\'bbname\']} - Abschluss berechnen</title>
-{$headerinclude}
-</head>
-<body>
-{$header}
-<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<tr>
-<td class="thead"><strong>Einschulung & Abschluss berechnen</strong></td>
-</tr>
-<tr>
-<td class="trow1">
-	<blockquote><center>HIER KOMMT NOCH NE LANGUAGES DATEI HIN<br><br></center>
-<table style="margin:auto;">
-	<tr>
-		<td style="text-align:center;">
-			<form method="get" id="berechnen" action ="/abschlussberechnen.php">
-				<input type="hidden" name="action" value="berechnung" width="10px">
-				<select name="schule">
-					Schulauswahl
-				</select>
-				<select name="tagberechnung">
-					Tagauswahl
-				</select>
-				<select name="monatberechnung">
-					Monatauswahl
-				</select>
-				<input type ="text" class="textbox" name="jahrberechnung">
-				<br><br><input type ="submit" value="Einschulung & Abschluss berechnen" class="button">
-			</form>
-		</td>
-	</tr>
-</table>
-		<br>
-		
-		<table width="100%">
+		<head>
+		<title>{$mybb->settings[\'bbname\']} - {$lang->abschluss_name}</title>
+		{$headerinclude}</head>
+		<body>
+		{$header}
+			<table width="100%" cellspacing="5" cellpadding="5"  class="trow2">
+				<tr>
+					{$menu}
+					<td valign="top" class="trow1">
+						<div style="text-align: justify; width: 70%; margin: 20px auto;">
+							<center>
+								{$lang->abschluss_welcome} 
+								<br>
+								<br>
+								<a href="abschluss.php?action=schools">Zur Schulübersicht</a>
+							</center>							
+							{$schulen}
+						</div>
+					</td>
+				</tr>
+				
+				<tr>
+					<td style="text-align:center;">
+						<form method="get" id="berechnen" action ="/abschluss.php">
+							<input type="hidden" name="action" value="" width="10px">
+							<select name="schule">
+								{$select_school}
+							</select>
+							<select name="tagberechnung">
+								{$select_day}
+							</select>
+							<select name="monatberechnung">
+								{$select_month}
+							</select>
+							<input type ="text" class="textbox" name="jahrberechnung">
+							<br><br><input type ="submit" value="{$lang->abschluss_name_button}" class="button">
+						</form>
+					</td>
+				</tr>
+			</table>
+			
+			<table width="100%" cellspacing="5" cellpadding="5"  class="trow2">
 			<tr>
-				<td width="50%">Angegebener Geburtstag:</td><td width="50%"> Hier steht der Geburtstag</td>
+				<td width="50%">{$lang->abschluss_main_gebi}</td><td width="50%"> {$tagberechnung}.{$monatberechnung}.{$jahrberechnung}</td>
 			</tr>
 			<tr>
-				<td width="50%">Ausgewählte Schule:</td><td width="50%"> Hier die Infos zur Schule</td>
+				<td width="50%">{$lang->abschluss_main_schule}</td><td width="50%">{$schulnamen} </td>
 			</tr>
 			<tr>
-				<td width="50%"><h2>Einschulung</h2></td><td width="50%"><h2>Abschluss</h2></td>
+				<td width="50%">{$lang->abschluss_main_alter}</td><td width="50%">{$lang->abschluss_main_jahre}</td>
 			</tr>
 			<tr>
-				<td width="50%">{$einschulung}</td><td width="50%">Hier das Jahr vom Abschluss</td>
+				<td width="50%">{$einschulalter}</td><td width="50%"> {$schuljahre}</td>
 			</tr>
-		</table>		
-		</blockquote>
-</td>
-</tr>
-</table>
-{$footer}
-</body>
-</html>') ,
+			<tr>
+				<td width="50%"><h2>{$lang->abschluss_main_rein}</h2></td><td width="50%"><h2>{$lang->abschluss_main_raus}</h2></td>
+			</tr>
+			<tr>
+				<td width="50%">{$einschulung}</td><td width="50%">{$abschluss}</td>
+			</tr>
+			</table>
+		{$footer}
+		</body>
+		</html>') ,
 		'sid' => '-1',
 		'version' => '',
 		'dateline' => TIME_NOW
 	);
 	$db->insert_query("templates", $insert_array);
 
+	// Template der Schuluebersicht hinzufügen:
 	$insert_array = array(
 		'title' => 'abschluss2',
-		'template' => $db->escape_string('HIER STEHT DER INHALT VOM TEMPLATE2') ,
+		'template' => $db->escape_string('<html>
+	<head>
+		<title>{$mybb->settings[\'bbname\']} - {$lang->abschluss_uebersicht} </title>
+		{$headerinclude}
+	</head>
+	<body>
+			{$header}
+		<table  width="100%" cellspacing="5" cellpadding="5">
+			
+			{$schule_view}
+		</table>
+			{$footer}
+	</body>
+</html>') ,
+		'sid' => '-1',
+		'version' => '',
+		'dateline' => TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+	
+	
+	$insert_array = array(
+		'title' => 'abschluss_schuleview',
+		'template' => $db->escape_string('<tr><td colspan="4" class="tcat">{$schule[\'schulname\']}</td></tr>
+<tr>
+		<td width="25%" class="thead">{$lang->abschluss_schule_rein}</td>
+		<td width="25%" class="thead">{$lang->abschluss_schule_jahre}</td>
+		<td width="25%" class="thead">{$lang->abschluss_schule_monat}</td>
+		<td width="25%" class="thead">{$lang->abschluss_schule_wo}</td>
+	</tr>
+<tr>
+	<td width="25%">{$schule[\'schulalter\']} {$lang->abschluss_schule_alter}</td>
+	<td width="25%">{$schule[\'schuljahre\']}</td>
+	<td width="25%">{$monate[$schulmonate]}</td>
+	<td width="25%">{$schule[\'schulstandort\']}</td>
+</tr>
+<tr><td colspan="4">
+	
+	<ul class="accordion">
+  <li>
+    <input type="checkbox" checked>
+    <i class="test"></i>
+	  {$lang->abschluss_schule_desc}
+    <p>{$schuldesc}</p>
+  </li>
+</ul></td></tr>') ,
 		'sid' => '-1',
 		'version' => '',
 		'dateline' => TIME_NOW
@@ -178,7 +235,7 @@ function abschluss_install()
 		
 		//Einstellungen deinstallieren:
 		$db->query("DELETE FROM " . TABLE_PREFIX . "settinggroups WHERE name='abschluss'"); //Gruppe löschen
-		$db->query("DELETE FROM " . TABLE_PREFIX . "settings WHERE name='abschluss_schuldesc'"); //Einzel-Einstellung löschen
+		$db->query("DELETE FROM " . TABLE_PREFIX . "settings WHERE name='abschluss_schuluebersicht'"); //Einzel-Einstellung löschen
 		
 		rebuild_settings();
 		
@@ -211,8 +268,6 @@ function abschluss_install()
 
 // DIE GANZE MAGIE!
 $plugins->add_hook('global_start', 'abschluss_global');
-//Für den Balken!
-//damit der auch funktioniert, siehe auch add_entry... 
 function abschluss_global() 
 {
 	global $db, $mybb, $templates, $lang, $action_file;
@@ -223,7 +278,6 @@ function abschluss_global()
 	
 	
 }
-
 
 
 // Admin CP konfigurieren - 
@@ -301,8 +355,12 @@ function abschluss_global()
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_alter</div>");
 			//Wie viele Jahrgänge besucht man?
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_jahre</div>");
-			//Ab welchem Monat wird man ein Jahr später eingeschult?
-			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_monat</div>");
+			//In welchem Monat beginnt das Schuljahr?
+			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_startmonat</div>");
+			//In welchem Monat endet das Schuljahr?
+			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_endmonat</div>");
+			//Sind Start-Monat und Abschluss im gleichen Jahr?
+			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_gleichesjahr</div>");
 			//Wo befindet sich die Schule?
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_standort</div>");
 			//Optionen
@@ -323,8 +381,18 @@ function abschluss_global()
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schulalter']).'</strong>');
 				//Wie viele Jahre besucht man die Schule?
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahre']).'</strong>');
-				//Ab welchem Monat wird man ein Jahr später eingeschult?
-				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schulmonate']).'</strong>');
+				//In welchem Monat beginnt das Schuljahr?
+				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahranfang']).'</strong>');
+				//In welchem Monat endet das Schuljahr?
+				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahrende']).'</strong>');
+				
+				//Anzeigen, ob Schuljahr im gleichen Jahr endet wie es beginnt
+				if ($abschluss_schule['schulgleichesjahr'] == 1) {
+					$gleichja = "<img src=\"styles/default/images/icons/archiv.png\" alt title=\"Ja\">";
+				}
+				else {
+					$gleichnein = "<img src=\"styles/default/images/icons/aktiv.png\" alt title=\"Nein\">";
+				}
 				//Wo befindet sich die Schule?
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schulstandort']).'</strong>');
 				
@@ -366,11 +434,11 @@ function abschluss_global()
                     $errors[] = $lang->abschluss_error_jahre;
                 }
 				
-				if (empty($mybb->input['schulmonate'])) {
+		if (empty($mybb->input['schulmonate'])) {
                     $errors[] = $lang->abschluss_error_monate;
                 }
 				
-				if (empty($mybb->input['schulstandort'])) {
+		if (empty($mybb->input['schulstandort'])) {
                     $errors[] = $lang->abschluss_error_standort;
                 }
 
@@ -381,12 +449,15 @@ function abschluss_global()
                         "schulid" => (int)$mybb->input['schulid'],
                         "schulname" => $db->escape_string($mybb->input['schulname']),
                         "schuldesc" => $db->escape_string($mybb->input['schuldesc']),
-						"schulalter" => $db->escape_string($mybb->input['schulalter']),
+			"schulalter" => $db->escape_string($mybb->input['schulalter']),
                         "schuljahre" => $db->escape_string($mybb->input['schuljahre']),
-                        "schulmonate" => $db->escape_string($mybb->input['schulmonate']),
-						"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
+			"schuljahranfang" => $db->escape_string($mybb->input['schuljahranfang']),
+			"schuljahrende" => $db->escape_string($mybb->input['schuljahrende']),
+                        "schulgleichesjahr" => intval($mybb->input['schulgleichesjahr']),
+			"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
                     );
-					$db->insert_query("abschluss_schule", $new_entry);
+			
+		    $db->insert_query("abschluss_schule", $new_entry);
 
                     $mybb->input['module'] = "abschluss";
                     $mybb->input['action'] = $lang->abschluss_add_entry_solved;
@@ -464,19 +535,30 @@ EOF;
                     $form->generate_text_box('schulalter', $mybb->input['schulalter'])
                 );
 			 
-			 	$form_container->output_row(
+		$form_container->output_row(
                     $lang->abschluss_form_jahre. "<em>*</em>",
                     $lang->abschluss_form_jahre_desc,
                     $form->generate_text_box('schuljahre', $mybb->input['schuljahre'])
                 );
  
-			 	$form_container->output_row(
-                    $lang->abschluss_form_monate. "<em>*</em>",
-                    $lang->abschluss_form_monate_desc,
-                    $form->generate_text_box('schulmonate', $mybb->input['schulmonate'])
-                );	
+		$form_container->output_row(
+                    $lang->abschluss_form_anfang. "<em>*</em>",
+                    $lang->abschluss_form_anfang_desc,
+                    $form->generate_text_box('schuljahranfang', $mybb->input['schuljahranfang'])
+                );
+		 
+		$form_container->output_row(
+                    $lang->abschluss_form_ende. "<em>*</em>",
+                    $lang->abschluss_form_ende_desc,
+                    $form->generate_text_box('schuljahrende', $mybb->input['schuljahrende'])
+                );
+		$form_container->output_row(
+			$lang->applicantstop_form_gleichesjahr."<em>*</em>", //
+			$lang->applicantstop_form_gleichesjahr_desc,
+			$form->generate_yes_no_radio('schulgleichesjahr', $mybb->get_input('schulgleichesjahr'))
+		);
 			 
-			 	$form_container->output_row(
+		$form_container->output_row(
                     $lang->abschluss_form_standort. "<em>*</em>",
                     $lang->abschluss_form_standort_desc,
                     $form->generate_text_box('schulstandort', $mybb->input['schulstandort'])
@@ -526,10 +608,12 @@ EOF;
                         "schulid" => (int)$mybb->input['schulid'],
                         "schulname" => $db->escape_string($mybb->input['schulname']),
                         "schuldesc" => $db->escape_string($mybb->input['schuldesc']),
-						"schulalter" => $db->escape_string($mybb->input['schulalter']),
+			"schulalter" => $db->escape_string($mybb->input['schulalter']),
                         "schuljahre" => $db->escape_string($mybb->input['schuljahre']),
-                        "schulmonate" => $db->escape_string($mybb->input['schulmonate']),
-						"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
+			"schuljahranfang" => $db->escape_string($mybb->input['schuljahranfang']),
+			"schuljahrende" => $db->escape_string($mybb->input['schuljahrende']),
+			"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
+			"schulgleichesjahr" => intval($mybb->input['schulgleichesjahr']),
                     ];
 
                     $db->update_query("abschluss_schule", $edited_entry, "schulid='{$schulid}'");
@@ -621,19 +705,31 @@ EOF;
                 $form->generate_text_box('schulalter', htmlspecialchars_uni($edit_entry['schulalter']))
             );
 			
-			$form_container->output_row(
+		$form_container->output_row(
                 $lang->abschluss_form_jahre . "<em>*</em>",
                 $lang->abschluss_form_jahre_desc,
                 $form->generate_text_box('schuljahre', htmlspecialchars_uni($edit_entry['schuljahre']))
             );
 			
-			$form_container->output_row(
-                $lang->abschluss_form_monate . "<em>*</em>",
-                $lang->abschluss_form_monate_desc,
-                $form->generate_text_box('schulmonate', htmlspecialchars_uni($edit_entry['schulmonate']))
+		$form_container->output_row(
+                $lang->abschluss_form_anfang . "<em>*</em>",
+                $lang->abschluss_form_anfang_desc,
+                $form->generate_text_box('schuljahranfang', htmlspecialchars_uni($edit_entry['schuljahranfang']))
+            );
+		
+		$form_container->output_row(
+                $lang->abschluss_form_ende . "<em>*</em>",
+                $lang->abschluss_form_ende_desc,
+                $form->generate_text_box('schuljahrende', htmlspecialchars_uni($edit_entry['schuljahrende']))
+            );
+		
+		$form_container->output_row(
+              	$lang->applicantstop_form_gleichesjahr."<em>*</em>", 
+                $lang->applicantstop_form_gleichesjahr_desc,
+                $form->generate_yes_no_radio('schulgleichesjahr', $edit_entry['schulgleichesjahr'])
             );
 			
-			$form_container->output_row(
+		$form_container->output_row(
                 $lang->abschluss_form_standort . "<em>*</em>",
                 $lang->abschluss_form_standort_desc,
                 $form->generate_text_box('schulstandort', htmlspecialchars_uni($edit_entry['schulstandort']))
