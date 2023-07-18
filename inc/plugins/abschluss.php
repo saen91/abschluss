@@ -40,7 +40,7 @@ function abschluss_install()
 	`schuljahrende` int(11) NOT NULL, 
 	`schuljahre` int(11)  NOT NULL,
 	`schulmonate` int(11)  NOT NULL,
-	`schulgleichesjahr` tinyint (1) NOT NULL, 
+	`gleichesjahr` tinyint NOT NULL, 
 	`schulstandort` varchar(500) CHARACTER SET utf8 NOT NULL,
 	PRIMARY KEY (`schulid`)
 	) ENGINE=MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;");
@@ -275,7 +275,6 @@ function abschluss_global()
 	
 	//Action Baum bauen
 	$mybb->input['action'] = $mybb->get_input('action');
-	
 	
 }
 
