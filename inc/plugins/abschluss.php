@@ -354,10 +354,8 @@ function abschluss_global()
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_alter</div>");
 			//Wie viele Jahrgänge besucht man?
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_jahre</div>");
-			//In welchem Monat beginnt das Schuljahr?
-			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_startmonat</div>");
-			//In welchem Monat endet das Schuljahr?
-			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_endmonat</div>");
+			//Ab welchem Monat wird man ein Jahr später eingeschult?
+			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_monat</div>");
 			//Sind Start-Monat und Abschluss im gleichen Jahr?
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_gleichesjahr</div>");
 			//Wo befindet sich die Schule?
@@ -380,11 +378,9 @@ function abschluss_global()
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schulalter']).'</strong>');
 				//Wie viele Jahre besucht man die Schule?
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahre']).'</strong>');
-				//In welchem Monat beginnt das Schuljahr?
+				//Ab welchem Monat wird man ein Jahr später eingeschult?
 				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahranfang']).'</strong>');
-				//In welchem Monat endet das Schuljahr?
-				$form_container->output_cell('<strong>'.htmlspecialchars_uni($abschluss_schule['schuljahrende']).'</strong>');
-				
+								
 				//Anzeigen, ob Schuljahr im gleichen Jahr endet wie es beginnt
 				if ($abschluss_schule['schulgleichesjahr'] == 1) {
 					$gleichja = "<img src=\"styles/default/images/icons/archiv.png\" alt title=\"Ja\">";
@@ -450,9 +446,8 @@ function abschluss_global()
                         "schuldesc" => $db->escape_string($mybb->input['schuldesc']),
 			"schulalter" => $db->escape_string($mybb->input['schulalter']),
                         "schuljahre" => $db->escape_string($mybb->input['schuljahre']),
-			"schuljahranfang" => $db->escape_string($mybb->input['schuljahranfang']),
-			"schuljahrende" => $db->escape_string($mybb->input['schuljahrende']),
-                        "schulgleichesjahr" => intval($mybb->input['schulgleichesjahr']),
+			"schulmonate" => $db->escape_string($mybb->input['schulmonate']),
+                        "gleichesjahr" => (int) $mybb->input['gleichesjahr'],
 			"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
                     );
 			
@@ -541,27 +536,29 @@ EOF;
                 );
  
 		$form_container->output_row(
-                    $lang->abschluss_form_anfang. "<em>*</em>",
-                    $lang->abschluss_form_anfang_desc,
-                    $form->generate_text_box('schuljahranfang', $mybb->input['schuljahranfang'])
-                );
-		 
-		$form_container->output_row(
-                    $lang->abschluss_form_ende. "<em>*</em>",
-                    $lang->abschluss_form_ende_desc,
-                    $form->generate_text_box('schuljahrende', $mybb->input['schuljahrende'])
-                );
-		$form_container->output_row(
-			$lang->applicantstop_form_gleichesjahr."<em>*</em>", //
-			$lang->applicantstop_form_gleichesjahr_desc,
-			$form->generate_yes_no_radio('schulgleichesjahr', $mybb->get_input('schulgleichesjahr'))
+			$lang->abschluss_form_monate . "<em>*</em>",
+			$lang->abschluss_form_monate_desc,
+			$form->generate_text_box('schulmonate', $mybb->input['schulmonate'])
 		);
-			 
+		 
+	 
 		$form_container->output_row(
                     $lang->abschluss_form_standort. "<em>*</em>",
                     $lang->abschluss_form_standort_desc,
                     $form->generate_text_box('schulstandort', $mybb->input['schulstandort'])
                 );
+
+		$form_container->output_row(
+			$lang->abschluss_form_gleichesjahr,
+			$lang->abschluss_form_gleichesjahr_desc,
+			$form->generate_select_box(
+				'gleichesjahr',
+				[0 => "Nein", 1 => "Ja"],
+				'',
+				['id' => 'gleichesjahr']
+			),
+			'gleichesjahr'
+		);
 
                 $form_container->end();
                 $buttons[] = $form->generate_submit_button($lang->abschluss_send);
@@ -591,10 +588,11 @@ EOF;
                     $errors[] = $lang->abschluss_error_jahre;
                 }
 				
-				if (empty($mybb->input['schulmonate'])) {
+		if (empty($mybb->input['schulmonate'])) {
                     $errors[] = $lang->abschluss_error_monate;
                 }
-				if (empty($mybb->input['schulstandort'])) {
+		    
+		if (empty($mybb->input['schulstandort'])) {
                     $errors[] = $lang->abschluss_error_standort;
                 }
 
@@ -609,10 +607,9 @@ EOF;
                         "schuldesc" => $db->escape_string($mybb->input['schuldesc']),
 			"schulalter" => $db->escape_string($mybb->input['schulalter']),
                         "schuljahre" => $db->escape_string($mybb->input['schuljahre']),
-			"schuljahranfang" => $db->escape_string($mybb->input['schuljahranfang']),
-			"schuljahrende" => $db->escape_string($mybb->input['schuljahrende']),
-			"schulstandort" => $db->escape_string($mybb->input['schulstandort'])
-			"schulgleichesjahr" => intval($mybb->input['schulgleichesjahr']),
+			"schulmonate" => $db->escape_string($mybb->input['schulmonate']),
+			"schulstandort" => $db->escape_string($mybb->input['schulstandort']),
+			"gleichesjahr" => (int) $mybb->input['gleichesjahr']
                     ];
 
                     $db->update_query("abschluss_schule", $edited_entry, "schulid='{$schulid}'");
@@ -711,28 +708,29 @@ EOF;
             );
 			
 		$form_container->output_row(
-                $lang->abschluss_form_anfang . "<em>*</em>",
-                $lang->abschluss_form_anfang_desc,
-                $form->generate_text_box('schuljahranfang', htmlspecialchars_uni($edit_entry['schuljahranfang']))
-            );
+		$lang->abschluss_form_monate . "<em>*</em>",
+		$lang->abschluss_form_monate_desc,
+		$form->generate_text_box('schulmonate', htmlspecialchars_uni($edit_entry['schulmonate']))
+		);
 		
-		$form_container->output_row(
-                $lang->abschluss_form_ende . "<em>*</em>",
-                $lang->abschluss_form_ende_desc,
-                $form->generate_text_box('schuljahrende', htmlspecialchars_uni($edit_entry['schuljahrende']))
-            );
-		
-		$form_container->output_row(
-              	$lang->applicantstop_form_gleichesjahr."<em>*</em>", 
-                $lang->applicantstop_form_gleichesjahr_desc,
-                $form->generate_yes_no_radio('schulgleichesjahr', $edit_entry['schulgleichesjahr'])
-            );
-			
+	
 		$form_container->output_row(
                 $lang->abschluss_form_standort . "<em>*</em>",
                 $lang->abschluss_form_standort_desc,
                 $form->generate_text_box('schulstandort', htmlspecialchars_uni($edit_entry['schulstandort']))
-            );
+           	);
+
+		$form_container->output_row(
+		$lang->abschluss_form_gleichesjahr,
+		$lang->abschluss_form_gleichesjahr_desc,
+		$form->generate_select_box(
+			'gleichesjahr',
+				[0 => "Nein", 1 => "Ja"],
+				$edit_entry['gleichesjahr'],
+				['id' => 'gleichesjahr']
+			),
+			'gleichesjahr'
+		);
  
             $form_container->end();
             $buttons[] = $form->generate_submit_button($lang->abschluss_send);
