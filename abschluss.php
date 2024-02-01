@@ -151,7 +151,7 @@ if ($mybb->input['action'] == "schools") {
         }
 	
 	//DATENBANKABFRAGE 
-	$sql_schule = "SELECT * FROM " . TABLE_PREFIX . "abschluss_schule WHERE kontinent LIKE '$filter_kontinent'";
+	$sql_schule = "SELECT * FROM " . TABLE_PREFIX . "abschluss_schule WHERE kontinent LIKE '$filter_kontinent' ORDER BY kontinent ASC";
 	$query_schule = $db->query($sql_schule);
 
 	while ($schule = $db->fetch_array($query_schule)) {
@@ -185,7 +185,7 @@ if ($mybb->input['action'] == "schools") {
 		
 		//BILDER FÜR KONTINENTE		
 		//schulgebiet in ein Array, damit im TPL kein Wort auftaucht sondern ein Bild. 
-		$kontinent_bilder = array ('Europa' => '<img src="images/abschluss_europa.png">', 'Asien' => '<img src="/images/abschluss_asien.png">', 'Nordamerika' => '<img src="/images/abschluss_nordamerika.png">', 'Südamerika' => '<img src="/images/abschluss_suedamerika.png">', 'Australien' => '<img src="/images/abschluss_australien.png">', 'Antarktika' => '<img src="/images/abschluss_antarktika.png">', 'Afrika' => '<img src="/images/abschluss_afrika.png">');
+		$kontinent_bilder = array ('Europa' => '<img src="images/abschluss_europa.png">', 'Asien' => '<img src="/images/abschluss_asien.png">', 'Nordamerika' => '<img src="/images/abschluss_nordamerika.png">', 'Suedamerika' => '<img src="/images/abschluss_suedamerika.png">', 'Australien' => '<img src="/images/abschluss_australien.png">', 'Antarktika' => '<img src="/images/abschluss_antarktika.png">', 'Afrika' => '<img src="/images/abschluss_afrika.png">');
 		
 		//wir geben hier einen neuen Variablenname für das eben erstellte Phänomen Array umwandeln. Wichtig!
 		//$gebietsbild aus dem Array $schulgebiet aus der oben erstellten Variable, ansonsten gehts nicht!
