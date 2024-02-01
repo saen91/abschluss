@@ -938,6 +938,15 @@ EOF;
 			exit;
 		}
 
+		// Format Entries
+require_once MYBB_ROOT . "inc/class_parser.php";
+$parser = new postParser;
+$parser_options = array(
+	"allow_html" => 1,
+	"allow_mycode" => 1,
+	"allow_smilies" => 1,
+	"allow_imgcode" => 1
+);
 
 
 		if ($mybb->input['action'] == "edit_entry") {
@@ -951,15 +960,12 @@ EOF;
 				if (empty($mybb->input['schulname'])) {
 					$errors[] = $lang->abschluss_error_titel;
 				}
-
 				if (empty($mybb->input['schulalter'])) {
 					$errors[] = $lang->abschluss_error_alter;
 				}
-
 				if (empty($mybb->input['schuljahre'])) {
 					$errors[] = $lang->abschluss_error_jahre;
 				}
-
 				if (empty($mybb->input['schulmonate'])) {
 					$errors[] = $lang->abschluss_error_monate;
 				}
@@ -1097,8 +1103,7 @@ EOF;
 				$lang->abschluss_form_standort . "<em>*</em>",
 				$lang->abschluss_form_standort_desc,
 				$form->generate_text_box('schulstandort', htmlspecialchars_uni($edit_entry['schulstandort']))
-			);
-			
+			);		
 			
 			$form_container->output_row(
 				$lang->abschluss_form_kontinent . "<em>*</em>",
