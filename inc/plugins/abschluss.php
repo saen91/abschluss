@@ -42,6 +42,7 @@ function abschluss_install()
 	`gleichesjahr` tinyint NOT NULL,
 	`schulstandort` varchar(500) CHARACTER SET utf8 NOT NULL,
 	`einzugsgebiet` varchar(500) CHARACTER SET utf8 NOT NULL,
+	`uid` varchar(255) CHARACTER SET utf8 NOT NULL,
 	PRIMARY KEY (`schulid`)
 	) ENGINE=MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;");
 
@@ -600,7 +601,6 @@ function abschluss_activate()
 	require MYBB_ROOT . "/inc/adminfunctions_templates.php";
 
 	//welches Template, welche variable wird gesucht, welche soll eingesetzt werden und wie sieht es dann aus?
-	//find_replace_templatesets('header', '#'.preg_quote('{$bbclosedwarning}').'#', '{$new_applicantstop} {$bbclosedwarning}');//
 
 }
 
@@ -610,7 +610,6 @@ function abschluss_deactivate()
 	global $db, $cache;
 	require MYBB_ROOT . "/inc/adminfunctions_templates.php";
 	//Variable wieder aus TPL entfernen.
-	// find_replace_templatesets("header", "#".preg_quote('{$new_applicantstop}')."#i", '', 0);//
 
 }
 
@@ -668,7 +667,7 @@ function abschluss_manage_abschluss()
 			// Add a breadcrumb - Navigation Seite 
 			$page->add_breadcrumb_item($lang->abschluss_manage);
 
-			//Header Auswahl Felder im Aufnahmestop verwalten Menü hinzufügen
+			//Header Auswahl Felder im Schuleverwalten Menü hinzufügen
 			$page->output_header($lang->abschluss_manage . " - " . $lang->abschluss_overview);
 
 			//Übersichtsseite über alle Schulen
@@ -711,6 +710,8 @@ function abschluss_manage_abschluss()
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_standort</div>");
 			//Auf welchem Kontinent?
 			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_kontinent</div>");
+			//Von User erstellt?
+			$form_container->output_row_header("<div style=\"text-align: center;\">$lang->abschluss_overview_titel_uid</div>");
 			//Optionen
 			$form_container->output_row_header($lang->abschluss_options, array('style' => 'text-align: center; width: 5%;'));
 
@@ -739,6 +740,8 @@ function abschluss_manage_abschluss()
 				$form_container->output_cell('<strong>' . htmlspecialchars_uni($abschluss_schule['schulstandort']) . '</strong>');
 				//Kontinent?
 				$form_container->output_cell('<strong>' . htmlspecialchars_uni($abschluss_schule['kontinent']) . '</strong>');
+				//von User erstellt?
+				$form_container->output_cell('<strong>' . htmlspecialchars_uni($abschluss_schule['uid']) . '</strong>');
 
 				//Pop Up für Bearbeiten & Löschen
 				$popup = new PopupMenu("abschluss_{$abschluss_schule['schulid']}", $lang->abschluss_options);
@@ -748,7 +751,7 @@ function abschluss_manage_abschluss()
 				);
 				$popup->add_item(
 					$lang->abschluss_delete,
-					"index.php?module=config-abschluss&amp;action=delete_entry&amp;stopid={$abschluss_schule['schulid']}"
+					"index.php?module=config-abschluss&amp;action=delete_entry&amp;schulid={$abschluss_schule['schulid']}"
 					. "&amp;my_post_key={$mybb->post_code}"
 				);
 				$form_container->output_cell($popup->fetch(), array("class" => "align_center"));
@@ -807,6 +810,7 @@ function abschluss_manage_abschluss()
 						"schulstandort" => $db->escape_string($mybb->input['schulstandort']),
 						"gleichesjahr" => (int) $mybb->input['gleichesjahr'],						
 						"einzugsgebiet" => $db->escape_string($mybb->input['einzugsgebiet']),
+						"uid" => $db->escape_string($mybb->input['uid']),
 					);
 					$db->insert_query("abschluss_schule", $new_entry);
 
@@ -840,7 +844,7 @@ EOF;
 				"description" => $lang->abschluss_overview_entries_desc
 			];
 
-			//Neuen Stop hinterlegen, Button
+			//Neue Schule hinterlegen, Button
 			$sub_tabs['abschluss_entry_add'] = [
 				"title" => $lang->abschluss_add_entry,
 				"link" => "index.php?module=config-abschluss&amp;action=add_entry",
@@ -928,6 +932,12 @@ EOF;
 				),
 				'gleichesjahr'
 			);
+			
+			$form_container->output_row(
+				$lang->abschluss_form_uid,
+				$lang->abschluss_form_uid_desc,
+				$form->generate_text_box('uid', $mybb->input['uid'])
+			);
 
 			$form_container->end();
 			$buttons[] = $form->generate_submit_button($lang->abschluss_send);
@@ -938,15 +948,6 @@ EOF;
 			exit;
 		}
 
-		// Format Entries
-require_once MYBB_ROOT . "inc/class_parser.php";
-$parser = new postParser;
-$parser_options = array(
-	"allow_html" => 1,
-	"allow_mycode" => 1,
-	"allow_smilies" => 1,
-	"allow_imgcode" => 1
-);
 
 
 		if ($mybb->input['action'] == "edit_entry") {
@@ -960,12 +961,15 @@ $parser_options = array(
 				if (empty($mybb->input['schulname'])) {
 					$errors[] = $lang->abschluss_error_titel;
 				}
+
 				if (empty($mybb->input['schulalter'])) {
 					$errors[] = $lang->abschluss_error_alter;
 				}
+
 				if (empty($mybb->input['schuljahre'])) {
 					$errors[] = $lang->abschluss_error_jahre;
 				}
+
 				if (empty($mybb->input['schulmonate'])) {
 					$errors[] = $lang->abschluss_error_monate;
 				}
@@ -991,7 +995,8 @@ $parser_options = array(
 						"schulmonate" => $db->escape_string($mybb->input['schulmonate']),
 						"schulstandort" => $db->escape_string($mybb->input['schulstandort']),
 						"gleichesjahr" => (int) $mybb->input['gleichesjahr'],
-						"einzugsgebiet" => $db->escape_string($mybb->input['einzugsgebiet'])
+						"einzugsgebiet" => $db->escape_string($mybb->input['einzugsgebiet']),
+						"uid" => $db->escape_string($mybb->input['uid'])
 					];
 
 					$db->update_query("abschluss_schule", $edited_entry, "schulid='{$schulid}'");
@@ -1103,7 +1108,8 @@ EOF;
 				$lang->abschluss_form_standort . "<em>*</em>",
 				$lang->abschluss_form_standort_desc,
 				$form->generate_text_box('schulstandort', htmlspecialchars_uni($edit_entry['schulstandort']))
-			);		
+			);
+			
 			
 			$form_container->output_row(
 				$lang->abschluss_form_kontinent . "<em>*</em>",
@@ -1128,6 +1134,12 @@ EOF;
 				),
 				'gleichesjahr'
 			);
+			
+			$form_container->output_row(
+				$lang->abschluss_form_uid,
+				$lang->abschluss_form_uid_desc,
+				$form->generate_text_box('uid', htmlspecialchars_uni($edit_entry['uid']))
+			);
 
 			$form_container->end();
 			$buttons[] = $form->generate_submit_button($lang->abschluss_send);
@@ -1146,7 +1158,7 @@ EOF;
 			$del_entry = $db->fetch_array($query);
 
 			// Error Handling
-			if (empty($stopid)) {
+			if (empty($schulid)) {
 				flash_message($lang->abschluss_error_option, 'error');
 				admin_redirect("index.php?module=config-abschluss");
 			}
@@ -1170,7 +1182,7 @@ EOF;
 
 					$mybb->input['module'] = "abschluss";
 					$mybb->input['action'] = $lang->abschluss_delete_entry_solved;
-					log_admin_action(htmlspecialchars_uni($del_entry['stoptitel']));
+					log_admin_action(htmlspecialchars_uni($del_entry['schulname']));
 
 					flash_message($lang->abschluss_delete_entry_solved, 'success');
 					admin_redirect("index.php?module=config-abschluss");
